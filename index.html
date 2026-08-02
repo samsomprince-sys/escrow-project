@@ -3,161 +3,307 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>سوق الجزائر الرقمي المفتوح - P2P Escrow</title>
+    <title>سوق الضمان الجزائري - P2P Escrow</title>
     <script src="https://telegram.org"></script>
     <style>
-        :root { --bg-color: #182533; --text-color: #ffffff; --hint-color: #7e91a4; --btn-color: #2f6ea5; --secondary-bg: #101921; }
-        body { font-family: sans-serif; background-color: var(--bg-color); color: var(--text-color); padding: 15px; margin: 0; }
-        .nav-tabs { display: flex; background: var(--secondary-bg); padding: 5px; border-radius: 8px; margin-bottom: 20px; }
-        .tab-btn { width: 50%; background: none; border: none; color: var(--hint-color); padding: 10px; font-weight: bold; cursor: pointer; }
-        .tab-btn.active { background: var(--btn-color); color: #fff; border-radius: 6px; }
-        .tab-content { display: none; } .tab-content.active { display: block; }
-        .product-card { background: var(--secondary-bg); padding: 15px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #233142; }
-        .btn { background: var(--btn-color); color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; }
-        .btn-danger { background: #e53935; }
-        .form-control { width: 100%; padding: 10px; margin-bottom: 10px; background: var(--secondary-bg); color: white; border: 1px solid #233142; border-radius: 5px; box-sizing: border-box; }
-        .modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); justify-content:center; align-items:center; }
-        .modal-content { background: var(--bg-color); padding: 20px; border-radius: 10px; width: 90%; max-width: 400px; border: 1px solid var(--btn-color); }
+        /* إعدادات ألوان مستوحاة من الوضع الليلي الفخم لتليجرام */
+        :root {
+            --bg-gradient: linear-gradient(135deg, #101921 0%, #182533 100%);
+            --card-bg: rgba(24, 37, 51, 0.7);
+            --card-border: rgba(43, 62, 85, 0.5);
+            --text-main: #ffffff;
+            --text-hint: #8ea1b4;
+            --accent-blue: #3782c4;
+            --accent-blue-hover: #4ba3e3;
+            --accent-green: #4caf50;
+            --accent-orange: #ff9800;
+            --danger: #e53935;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--bg-gradient);
+            background-attachment: fixed;
+            color: var(--text-main);
+            padding: 15px;
+            margin: 0;
+            padding-bottom: 50px;
+        }
+
+        /* رأس الصفحة الفخم */
+        .app-header {
+            text-align: center;
+            margin-bottom: 25px;
+            padding: 10px 0;
+        }
+
+        .app-header h1 {
+            font-size: 24px;
+            margin: 0;
+            color: var(--text-main);
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        .app-header p {
+            font-size: 13px;
+            color: var(--text-hint);
+            margin: 5px 0 0 0;
+        }
+
+        /* شريط التنقل العلوي الأنيق */
+        .nav-tabs {
+            display: flex;
+            background: rgba(16, 25, 33, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 6px;
+            border-radius: 14px;
+            margin-bottom: 25px;
+            border: 1px solid var(--card-border);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+        }
+
+        .tab-btn {
+            width: 50%;
+            background: none;
+            border: none;
+            color: var(--text-hint);
+            padding: 12px;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 10px;
+        }
+
+        .tab-btn.active {
+            background: var(--accent-blue);
+            color: #ffffff;
+            box-shadow: 0 4px 15px rgba(55, 130, 196, 0.3);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section-title {
+            font-size: 16px;
+            color: var(--text-hint);
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        /* تصميم كروت المنتجات الاحترافي */
+        .product-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(8px);
+            padding: 18px;
+            border-radius: 16px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid var(--card-border);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            transition: transform 0.2s ease, border-color 0.2s ease;
+        }
+
+        .product-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(55, 130, 196, 0.4);
+        }
+
+        .product-info-box {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .prod-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .prod-price {
+            color: var(--accent-green);
+            font-weight: 800;
+            font-size: 17px;
+        }
+
+        .prod-meta {
+            color: var(--text-hint);
+            font-size: 12px;
+            display: flex;
+            gap: 10px;
+            margin-top: 2px;
+        }
+
+        /* الأزرار الفخمة */
+        .btn {
+            background: var(--accent-blue);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(55, 130, 196, 0.2);
+        }
+
+        .btn:hover {
+            background: var(--accent-blue-hover);
+            box-shadow: 0 4px 16px rgba(55, 130, 196, 0.4);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            box-shadow: 0 4px 12px rgba(229, 57, 53, 0.2);
+        }
+        .btn-danger:hover {
+            background: #ef5350;
+        }
+
+        /* تصميم حقول الإدخال */
+        .form-group {
+            margin-bottom: 16px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 13px;
+            color: var(--text-hint);
+            font-weight: 600;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 14px;
+            background: rgba(16, 25, 33, 0.6);
+            color: white;
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            box-sizing: border-box;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+        }
+
+        /* تصميم النوافذ المنبثقة التفاعلية */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+        }
+
+        .modal-content {
+            background: #182533;
+            padding: 24px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 400px;
+            border: 1px solid var(--card-border);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            animation: modalSlide 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes modalSlide {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .rip-display {
+            background: #101921;
+            padding: 14px;
+            text-align: center;
+            color: var(--accent-orange);
+            font-weight: 700;
+            font-size: 18px;
+            border-radius: 10px;
+            margin: 15px 0;
+            letter-spacing: 0.5px;
+            border: 1px dashed rgba(255, 152, 0, 0.3);
+        }
     </style>
 </head>
 <body>
 
-    <div class="nav-tabs">
-        <button class="tab-btn active" onclick="switchTab('market')">تصفح سوق المنتجات</button>
-        <button class="tab-btn" onclick="switchTab('seller')">أنشر منتجك (لوحة التاجر)</button>
+    <div class="app-header">
+        <h1>سوق الضمان الجزائري</h1>
+        <p>المنصة المفتوحة الأكثر أماناً للتجارة الرقمية P2P</p>
     </div>
 
-    <!-- 1. تبويب السوق المفتوح -->
+    <div class="nav-tabs">
+        <button class="tab-btn active" onclick="switchTab('market')">تصفح السوق</button>
+        <button class="tab-btn" onclick="switchTab('seller')">أنشر منتجك</button>
+    </div>
+
+    <!-- 1. تبويب السوق المفتوح المطور -->
     <div id="market" class="tab-content active">
-        <h3>السلع الرقمية المتاحة للتجار الجزائريين</h3>
+        <div class="section-title">العروض الرقمية الحية المتوفرة حالياً</div>
         <div id="products-marketplace-list">جاري تحميل سوق الـ P2P...</div>
     </div>
 
-    <!-- 2. لوحة أي مستخدم يريد البيع -->
+    <!-- 2. لوحة البائع الأنيقة -->
     <div id="seller" class="tab-content">
-        <h3>اعرض منتجك الرقمي للبيع بأمان</h3>
-        <input type="text" id="s-username" class="form-control" placeholder="اسمك التجاري أو معرف تليجرام">
-        <input type="text" id="p-name" class="form-control" placeholder="اسم السلعة (مثال: حساب Netflix شهر)">
-        <input type="number" id="p-price" class="form-control" placeholder="السعر المطلوب بالدينار DA">
-        <input type="text" id="p-rip" class="form-control" placeholder="رقم الـ RIP الخاص بك لاستلام الأموال">
-        <textarea id="p-secret" class="form-control" rows="3" placeholder="المعلومات السرية للمنتج (مثال الإيميل والباسورد - لن تظهر للمشتري إلا بعد تأكيد أموالك)"></textarea>
-        <button class="btn" style="width:100%; margin-top: 5px;" onclick="publishProductToMarket()">نشر المنتج في المتجر العام</button>
+        <div class="section-title">عرض منتج رقمي للبيع بنظام حجز السلعة</div>
+        
+        <div class="form-group">
+            <label>اسمك التجاري المستعار</label>
+            <input type="text" id="s-username" class="form-control" placeholder="مثال: أمين ستور">
+        </div>
+        
+        <div class="form-group">
+            <label>اسم السلعة الرقمية</label>
+            <input type="text" id="p-name" class="form-control" placeholder="مثال: حساب Netflix Premium شهر">
+        </div>
+
+        <div class="form-group">
+            <label>السعر المطلوب بالدينار</label>
+            <input type="number" id="p-price" class="form-control" placeholder="مثال: 500">
+        </div>
+
+        <div class="form-group">
+            <label>رقم حساب الـ RIP الخاص بك لاستلام الأموال</label>
+            <input type="text" id="p-rip" class="form-control" placeholder="00799999...">
+        </div>
+
+        <div class="form-group">
+            <label>المعلومات والبيانات السرية للمنتج (لن تظهر إلا بعد تأكيد الدفع)</label>
+            <textarea id="p-secret" class="form-control" rows="3" placeholder="اكتب هنا الإيميل والباسورد أو مفتاح التفعيل السرّي..."></textarea>
+        </div>
+
+        <button class="btn" style="width:100%; margin-top: 10px; padding: 14px;" onclick="publishProductToMarket()">نشر المنتج في السوق العام</button>
     </div>
 
-    <!-- نافذة طلب الضمان المنبثقة -->
+    <!-- نافذة طلب الضمان المنبثقة المطورة -->
     <div id="escrow-modal" class="modal">
         <div class="modal-content">
-            <h3>طلب شراء آمن بنظام الضمان</h3>
-            <p>المنتج: <span id="m-prod-name" style="font-weight:bold; color: #ffb74d;"></span></p>
-            <p>السعر: <span id="m-prod-price" style="font-weight:bold; color:#4caf50;"></span> DA</p>
-            <p>البائع: <span id="m-seller-name" style="font-weight:bold;"></span></p>
-            <hr style="border: 0.5px solid #233142;">
-            <p>قم بتحويل المبلغ عبر BaridiMob إلى حساب البائع التالي:</p>
-            <div id="m-seller-rip" style="background:#101921; padding:10px; text-align:center; color:#ffb74d; font-weight:bold; font-size:16px; margin-bottom:15px; letter-spacing: 0.5px;"></div>
+            <h3 style="margin-top:0; font-size:18px;">شراء آمن بنظام الضمان الموثق</h3>
+            <p style="font-size:14px; color:var(--text-hint); margin-bottom:15px;">سيتم حجز السلعة في السيرفر تلقائياً حتى يوافق الوسيط.</p>
             
-            <input type="text" id="b-name" class="form-control" placeholder="اسمك الكامل">
-            <input type="text" id="b-phone" class="form-control" placeholder="رقم هاتفك لتأكيد المعاملة">
-            
-            <button class="btn" style="width:100%; margin-bottom: 5px;" onclick="confirmEscrowPurchase()">تأكيد التحويل وإرسال الطلب للوسيط</button>
-            <button class="btn btn-danger" style="width:100%;" onclick="closeModal()">إلغاء</button>
-        </div>
-    </div>
-
-    <script>
-        const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null; if(tg) tg.expand();
-        const API_URL = window.location.origin; 
-        let marketplaceProducts = [];
-        let selectedProduct = null;
-
-        async function loadMarketplace() {
-            try {
-                const res = await fetch(`${API_URL}/api/products`);
-                marketplaceProducts = await res.json();
-                renderMarket();
-            } catch (err) {
-                document.getElementById('products-marketplace-list').innerText = "خطأ في الاتصال بسوق الـ P2P.";
-            }
-        }
-
-        function switchTab(tab) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-            document.getElementById(tab).classList.add('active');
-            event.currentTarget.classList.add('active');
-            if(tab === 'market') loadMarketplace();
-        }
-
-        function renderMarket() {
-            const container = document.getElementById('products-marketplace-list');
-            container.innerHTML = '';
-            
-            if(marketplaceProducts.length === 0) {
-                container.innerHTML = "<p style='text-align:center;color:var(--hint-color)'>السوق فارغ حالياً، كن أول من ينشر منتجه!</p>";
-                return;
-            }
-
-            marketplaceProducts.forEach(p => {
-                container.innerHTML += `
-                    <div class="product-card">
-                        <div>
-                            <b style="font-size:16px;">${p.product_name}</b><br>
-                            <span style="color:#4caf50; font-weight:bold;">${p.price} DA</span><br>
-                            <span style="color:var(--hint-color); font-size:12px;">التاجر: ${p.seller_name}</span>
-                        </div>
-                        <button class="btn" onclick="openEscrowModal(${p.id})">شراء (ضمان)</button>
-                    </div>
-                `;
-            });
-        }
-
-        async function publishProductToMarket() {
-            const seller_name = document.getElementById('s-username').value;
-            const product_name = document.getElementById('p-name').value;
-            const price = document.getElementById('p-price').value;
-            const rip_number = document.getElementById('p-rip').value;
-            const secret_data = document.getElementById('p-secret').value;
-
-            if(!seller_name || !product_name || !price || !rip_number || !secret_data) return alert('امْلأ جميع الحقول لحماية حقك!');
-            
-            await fetch(`${API_URL}/api/products`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ seller_name, product_name, price, rip_number, secret_data })
-            });
-
-            alert('تم نشر منتجك الرقمي بنجاح في السوق المفتوح!');
-            document.getElementById('p-name').value = ''; document.getElementById('p-price').value = '';
-            document.getElementById('p-rip').value = ''; document.getElementById('p-secret').value = '';
-            switchTab('market');
-        }
-
-        function openEscrowModal(id) {
-            selectedProduct = marketplaceProducts.find(p => p.id === id);
-            document.getElementById('m-prod-name').innerText = selectedProduct.product_name;
-            document.getElementById('m-prod-price').innerText = selectedProduct.price;
-            document.getElementById('m-seller-name').innerText = selectedProduct.seller_name;
-            document.getElementById('m-seller-rip').innerText = selectedProduct.rip_number;
-            document.getElementById('escrow-modal').style.display = 'flex';
-        }
-
-        function closeModal() { document.getElementById('escrow-modal').style.display = 'none'; }
-        
-        async function confirmEscrowPurchase() {
-            const name = document.getElementById('b-name').value; const phone = document.getElementById('b-phone').value;
-            if(!name || !phone) return alert('أدخل بياناتك الشخصية لتأكيد المعاملة!');
-            
-            await fetch(`${API_URL}/api/orders`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ product_id: selectedProduct.id, buyer_name: name, buyer_phone: phone })
-            });
-            
-            alert('تم حجز المنتج وإرسال تفاصيل المعاملة للوسيط بنجاح!');
-            closeModal();
-            if(tg) tg.close();
-        }
-
-        loadMarketplace();
-    </script>
-</body>
-</html>
+            <div style="font-size:14px; display:flex; flex-direction:column; gap:6px; background:rgba(0,0,0,0.15); padding:12px; border-radius:10px;">
+                <div>المنتج: <span id="m-prod-name" style="font-weight:700; color: var(--accent-orange);"></span></div>
+                <div>السعر: <span id="m-prod-price" style="font-weight:700; color:var(--accent-green);"></span> DA</div>
