@@ -6,7 +6,6 @@
     <title>سوق الضمان الجزائري - P2P Escrow</title>
     <script src="https://telegram.org"></script>
     <style>
-        /* إعدادات ألوان مستوحاة من الوضع الليلي الفخم لتليجرام */
         :root {
             --bg-gradient: linear-gradient(135deg, #101921 0%, #182533 100%);
             --card-bg: rgba(24, 37, 51, 0.7);
@@ -30,7 +29,6 @@
             padding-bottom: 50px;
         }
 
-        /* رأس الصفحة الفخم */
         .app-header {
             text-align: center;
             margin-bottom: 25px;
@@ -52,7 +50,6 @@
             margin: 5px 0 0 0;
         }
 
-        /* شريط التنقل العلوي الأنيق */
         .nav-tabs {
             display: flex;
             background: rgba(16, 25, 33, 0.8);
@@ -104,7 +101,6 @@
             font-weight: 600;
         }
 
-        /* تصميم كروت المنتجات الاحترافي */
         .product-card {
             background: var(--card-bg);
             backdrop-filter: blur(8px);
@@ -150,7 +146,6 @@
             margin-top: 2px;
         }
 
-        /* الأزرار الفخمة */
         .btn {
             background: var(--accent-blue);
             color: white;
@@ -177,7 +172,6 @@
             background: #ef5350;
         }
 
-        /* تصميم حقول الإدخال */
         .form-group {
             margin-bottom: 16px;
         }
@@ -206,7 +200,6 @@
             border-color: var(--accent-blue);
         }
 
-        /* تصميم النوافذ المنبثقة التفاعلية */
         .modal {
             display: none;
             position: fixed;
@@ -260,7 +253,7 @@
         <button class="tab-btn" onclick="switchTab('seller')">أنشر منتجك</button>
     </div>
 
-    <!-- 1. تبويب السوق المفتوح المطور -->
+    <!-- 1. تبويب السوق المفتوح -->
     <div id="market" class="tab-content active">
         <div class="section-title">العروض الرقمية الحية المتوفرة حالياً</div>
         <div id="products-marketplace-list">جاري تحميل سوق الـ P2P...</div>
@@ -307,3 +300,7 @@
             <div style="font-size:14px; display:flex; flex-direction:column; gap:6px; background:rgba(0,0,0,0.15); padding:12px; border-radius:10px;">
                 <div>المنتج: <span id="m-prod-name" style="font-weight:700; color: var(--accent-orange);"></span></div>
                 <div>السعر: <span id="m-prod-price" style="font-weight:700; color:var(--accent-green);"></span> DA</div>
+                <div>البائع الموثق: <span id="m-seller-name" style="font-weight:700;"></span></div>
+            </div>
+
+            <p style="font-size:13px; margin: 15px 0 5px 0; color:var(--text-hint);">قم بتحويل المبلغ عبر BaridiMob إلى البائع:</p>
