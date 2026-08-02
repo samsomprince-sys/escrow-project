@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  escrow-store:
+    build: .
+    container_name: algerian-escrow-system
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./database.db:/usr/src/app/database.db
+    restart: always

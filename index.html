@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سوق الجزائر الرقمي المفتوح - P2P Escrow</title>
+    <script src="https://telegram.org"></script>
+    <style>
+        :root { --bg-color: #182533; --text-color: #ffffff; --hint-color: #7e91a4; --btn-color: #2f6ea5; --secondary-bg: #101921; }
+        body { font-family: sans-serif; background-color: var(--bg-color); color: var(--text-color); padding: 15px; margin: 0; }
+        .nav-tabs { display: flex; background: var(--secondary-bg); padding: 5px; border-radius: 8px; margin-bottom: 20px; }
+        .tab-btn { width: 50%; background: none; border: none; color: var(--hint-color); padding: 10px; font-weight: bold; cursor: pointer; }
+        .tab-btn.active { background: var(--btn-color); color: #fff; border-radius: 6px; }
+        .tab-content { display: none; } .tab-content.active { display: block; }
+        .product-card { background: var(--secondary-bg); padding: 15px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #233142; }
+        .btn { background: var(--btn-color); color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .btn-danger { background: #e53935; }
+        .form-control { width: 100%; padding: 10px; margin-bottom: 10px; background: var(--secondary-bg); color: white; border: 1px solid #233142; border-radius: 5px; box-sizing: border-box; }
+        .modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); justify-content:center; align-items:center; }
+        .modal-content { background: var(--bg-color); padding: 20px; border-radius: 10px; width: 90%; max-width: 400px; border: 1px solid var(--btn-color); }
+    </style>
+</head>
+<body>
+
+    <div class="nav-tabs">
+        <button class="tab-btn active" onclick="switchTab('market')">تصفح سوق المنتجات</button>
+        <button class="tab-btn" onclick="switchTab('seller')">أنشر منتجك (لوحة التاجر)</button>
+    </div>
+
+    <!-- 1. تبويب السوق المفتوح -->
+    <div id="market" class="tab-content active">
+        <h3>السلع الرقمية المتاحة للتجار الجزائريين</h3>
+        <div id="products-marketplace-list">جاري تحميل سوق الـ P2P...</div>
+    </div>
+
+    <!-- 2. لوحة أي مستخدم يريد البيع -->
+    <div id="seller" class="tab-content">
+        <h3>اعرض منتجك الرقمي للبيع بأمان</h3>
+        <input type="text" id="s-username" class="form-control" placeholder="اسمك التجاري أو معرف تليجرام">
+        <input type="text" id="p-name" class="form-control" placeholder="اسم السلعة (مثال: حساب Netflix شهر)">
+        <input type="number" id="p-price" class="form-control" placeholder="السعر المطلوب بالدينار DA">
+        <input type="text" id="p-rip" class="form-control" placeholder="رقم الـ RIP الخاص بك لاستلام الأموال">
+        <textarea id="p-secret" class="form-control" rows="3" placeholder="المعلومات السرية للمنتج (مثال الإيميل والباسورد - لن تظهر للمشتري إلا بعد تأكيد أموالك)"></textarea>
+        <button class="btn" style="width:100%; margin-top: 5px;" onclick="publishProductToMarket()">نشر المنتج في المتجر العام</button>
+    </div>
+
+    <!-- نافذة طلب الضمان المنبثقة -->
+    <div id="escrow-modal" class="modal">
+        <div class="modal-content">
+            <h3>طلب شراء آمن بنظام الضمان</h3>
+            <p>المنتج: <span id="m-prod-name" style="font-weight:bold; color: #ffb74d;"></span></p>
+            <p>السعر: <span id="m-prod-price" style="font-weight:bold; color:#4caf50;"></span> DA</p>
+            <p>البائع: <span id="m-seller-name" style="font-weight:bold;"></span></p>
+            <hr style="border: 0.5px solid #233142;">
+            <p>قم بتحويل المبلغ عبر BaridiMob إلى حساب البائع التالي:</p>
+            <div id="m-seller-rip" style="background:#101921; padding:10px; text-align:center; color:#ffb74d; font-weight:bold; font-size:16px; margin-bottom:15px; letter-spacing: 0.5px;"></div>
+            
+            <input type="text" id="b-name" class="form-control" placeholder="اسمك الكامل">
+            <input type="text" id="b-phone" class="form-control" placeholder="رقم هاتفك لتأكيد المعاملة">
+            
+            <button class="btn" style="width:100%; margin-bottom: 5px;" onclick="confirmEscrowPurchase()">تأكيد التحويل وإرسال الطلب للوسيط</button>
+            <button class="btn btn-danger" style="width:100%;" onclick="closeModal()">إلغاء</button>
+        </div>
+    </div>
+
+    <script>
+        const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null; if(tg) tg.expand();
+        const API_URL = window.location.origin; 
+        let marketplaceProducts = [];
+        let selectedProduct = null;
+
+        async function loadMarketplace() {
+            try {
+                const res = await fetch(`${API_URL}/api/products`);
+                marketplaceProducts = await res.json();
+                renderMarket();
+            } catch (err) {
+                document.getElementById('products-marketplace-list').innerText = "خطأ في الاتصال بسوق الـ P2P.";
+            }
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(tab).classList.add('active');
+            event.currentTarget.classList.add('active');
+            if(tab === 'market') loadMarketplace();
+        }
+
+        function renderMarket() {
+            const container = document.getElementById('products-marketplace-list');
+            container.innerHTML = '';
+            
+            if(marketplaceProducts.length === 0) {
+                container.innerHTML = "<p style='text-align:center;color:var(--hint-color)'>السوق فارغ حالياً، كن أول من ينشر منتجه!</p>";
+                return;
+            }
+
+            marketplaceProducts.forEach(p => {
+                container.innerHTML += `
+                    <div class="product-card">
+                        <div>
+                            <b style="font-size:16px;">${p.product_name}</b><br>
+                            <span style="color:#4caf50; font-weight:bold;">${p.price} DA</span><br>
+                            <span style="color:var(--hint-color); font-size:12px;">التاجر: ${p.seller_name}</span>
+                        </div>
+                        <button class="btn" onclick="openEscrowModal(${p.id})">شراء (ضمان)</button>
+                    </div>
+                `;
+            });
+        }
+
+        async function publishProductToMarket() {
+            const seller_name = document.getElementById('s-username').value;
+            const product_name = document.getElementById('p-name').value;
+            const price = document.getElementById('p-price').value;
+            const rip_number = document.getElementById('p-rip').value;
+            const secret_data = document.getElementById('p-secret').value;
+
+            if(!seller_name || !product_name || !price || !rip_number || !secret_data) return alert('امْلأ جميع الحقول لحماية حقك!');
+            
+            await fetch(`${API_URL}/api/products`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ seller_name, product_name, price, rip_number, secret_data })
+            });
+
+            alert('تم نشر منتجك الرقمي بنجاح في السوق المفتوح!');
+            document.getElementById('p-name').value = ''; document.getElementById('p-price').value = '';
+            document.getElementById('p-rip').value = ''; document.getElementById('p-secret').value = '';
+            switchTab('market');
+        }
+
+        function openEscrowModal(id) {
+            selectedProduct = marketplaceProducts.find(p => p.id === id);
+            document.getElementById('m-prod-name').innerText = selectedProduct.product_name;
+            document.getElementById('m-prod-price').innerText = selectedProduct.price;
+            document.getElementById('m-seller-name').innerText = selectedProduct.seller_name;
+            document.getElementById('m-seller-rip').innerText = selectedProduct.rip_number;
+            document.getElementById('escrow-modal').style.display = 'flex';
+        }
+
+        function closeModal() { document.getElementById('escrow-modal').style.display = 'none'; }
+        
+        async function confirmEscrowPurchase() {
+            const name = document.getElementById('b-name').value; const phone = document.getElementById('b-phone').value;
+            if(!name || !phone) return alert('أدخل بياناتك الشخصية لتأكيد المعاملة!');
+            
+            await fetch(`${API_URL}/api/orders`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ product_id: selectedProduct.id, buyer_name: name, buyer_phone: phone })
+            });
+            
+            alert('تم حجز المنتج وإرسال تفاصيل المعاملة للوسيط بنجاح!');
+            closeModal();
+            if(tg) tg.close();
+        }
+
+        loadMarketplace();
+    </script>
+</body>
+</html>
